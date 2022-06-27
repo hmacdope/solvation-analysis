@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.interpolate import UnivariateSpline
+from scipy.signal import find_peaks, savgol_filter
 import scipy
 import matplotlib.pyplot as plt
 import warnings
@@ -163,3 +164,13 @@ def identify_solvation_cutoff(
                                "Please enter the missing radii manually by adding them to the radii dict"
                                "and rerun the analysis.")
     return cr_pts[1]
+
+def find_peaks(bins, rdf, savgol_filter_kwargs, find_peaks_kwargs):
+    rdf_smooth = savgol_filter(rdf, window_length=5, polyorder=3, **savgol_filter_kwargs)
+    peaks, _ = find_peaks(-rdf_smooth, **find_peaks_kwargs)
+    radii = bins[peaks[0]]
+    if (radii < 1.0) or (radii > 6.0):
+        raise ValueError
+
+    return radii
+
